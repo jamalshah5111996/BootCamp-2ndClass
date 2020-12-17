@@ -1,0 +1,45 @@
+name: Class 2 BootCamp
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the site in the jekyll/builder container
+      run: |
+        docker run \
+        -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site \
+        jekyll/builder:latest /bin/bash -c "chmod 777 /srv/jekyll && jekyll build --future"
+        
+# Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v2-beta
+      with: 
+        version: 12
+        
+    - name: GitHub Action for Yarn
+      uses: Borales/actions-yarn@v2.1.0
+      with:
+        # Yarn command
+        cmd: install # npm install/ yarn install
+    
+    - name: Creating build
+      run: yarn build
+    
+    - name: installing surge  
+      run: npm install -g surge
+    
+    - name: deploying on surge
+      run: surge ./build http://bootcamp-2ndproject.surge.sh/ --token ${{secrets.SURGE_TOKEN}}
